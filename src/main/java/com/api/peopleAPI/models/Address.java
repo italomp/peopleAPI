@@ -1,19 +1,38 @@
 package com.api.peopleAPI.models;
 
+import org.hibernate.annotations.Cascade;
+
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * @residentList is the list of people who have that address (there may be
+ * different people in a family, with the same address).
+ *
+ * @mainResidentList is the list of people who have this address as their main address.
+ *
+ * The residentList should to contain the people of mainResidentList
+ */
 @Entity
+@Table(name = "ADDRESS")
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private long id;
+    @Column(name = "STREET")
     private String street;
+    @Column(name = "NUMBER")
     private Integer number;
+    @Column(name = "CEP")
     private String cep;
+    @Column(name = "CITY")
     private String city;
     @ManyToMany(mappedBy = "addressList")
-    private List<Person> personList;
+    private List<Person> residentList;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "mainAddress", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    private List<Person> mainResidentList;
 
     public Address() {
     }
@@ -66,11 +85,11 @@ public class Address {
         this.city = city;
     }
 
-    public List<Person> getPersonList() {
-        return personList;
+    public List<Person> getResidentList() {
+        return residentList;
     }
 
-    public void setPersonList(List<Person> personList) {
-        this.personList = personList;
+    public void setResidentList(List<Person> residentList) {
+        this.residentList = residentList;
     }
 }
