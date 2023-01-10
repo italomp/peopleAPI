@@ -2,7 +2,7 @@ package com.api.peopleAPI.dtos;
 
 import java.io.Serializable;
 
-public class AddressDTO implements Serializable {
+public class AddressDto implements Serializable {
     private long id;
     private String street;
     private Integer number;
@@ -10,9 +10,9 @@ public class AddressDTO implements Serializable {
     private String city;
     private long personId;
 
-    public AddressDTO(){}
+    public AddressDto(){}
 
-    public AddressDTO(String street, Integer number, Integer cep, String city, long personId) {
+    public AddressDto(String street, Integer number, Integer cep, String city, long personId) {
         this.street = street;
         this.number = number;
         this.cep = cep;

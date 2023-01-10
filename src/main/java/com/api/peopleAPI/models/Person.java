@@ -1,9 +1,12 @@
 package com.api.peopleAPI.models;
 
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "PERSON")
@@ -13,8 +16,10 @@ public class Person implements Serializable {
     @Column(name = "ID")
     private long id;
     @Column(name = "NAME")
+    @NotNull(message = "Person name can't be null")
     private String name;
     @Column(name = "BIRTH_DATE")
+    @NotNull(message = "Person birth date can't be null")
     private LocalDate birthDate;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "PERSON_ADDRESS",
@@ -73,5 +78,18 @@ public class Person implements Serializable {
 
     public void setMainAddress(Address mainAddress) {
         this.mainAddress = mainAddress;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return name.equals(person.name) && birthDate.equals(person.birthDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, birthDate);
     }
 }

@@ -1,16 +1,16 @@
 package com.api.peopleAPI.services;
 
-import com.api.peopleAPI.dtos.AddressDTO;
-import com.api.peopleAPI.dtos.PersonDTO;
+import com.api.peopleAPI.dtos.AddressDto;
+import com.api.peopleAPI.dtos.PersonDto;
 import com.api.peopleAPI.exceptions.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
 import com.api.peopleAPI.repositories.PersonRepository;
+import com.api.peopleAPI.utils.PersonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,30 +23,32 @@ public class PersonService {
 
     public PersonService(){}
 
-    public HttpStatus savePerson(PersonDTO dto){
+    public HttpStatus savePerson(PersonDto dto){
         if(dto == null){
             return HttpStatus.BAD_REQUEST;
         }
+        checkNullAttributes(dto);
         saveNewPersonAddresses(dto.getMainAddress(), dto.getAlternativeAddressList());
-        Person newPerson = new Person(
-                dto.getName(),
-                LocalDate.parse(dto.getBirthDate()),
-                dto.getMainAddress(),
-                dto.getAlternativeAddressList());
+        Person newPerson = PersonMapper.fromDtoToPerson(dto);
         personRepository.save(newPerson);
         return HttpStatus.CREATED;
+    }
+
+    public void checkNullAttributes(PersonDto dto){
+        if(dto.getName() == null)
+            throw new IllegalArgumentException("Person name can't be null");
+        if(dto.getBirthDate() == null)
+            throw new IllegalArgumentException("Person birthdate can't be null");
     }
 
     // Permite que endereços repetidos sejam salvos
     public void saveNewPersonAddresses(Address mainAddres, List<Address> alternativeAddresses){
         if(mainAddres != null){
-            System.out.println(mainAddres.getStreet() + " - " + mainAddres.getNumber());
             addressService.save(mainAddres);
         }
         if(alternativeAddresses != null){
             alternativeAddresses.forEach(address -> {
                 if(address != null) {
-                    System.out.println(address.getStreet() + " - " + address.getNumber());
                     addressService.save(address);
                 }
             });
@@ -54,7 +56,7 @@ public class PersonService {
     }
 
     // Esse método implementará a funcionalidade de salvar um endereço para uma pessoa já cadastrada.
-    public HttpStatus saveAddresForStoragedPerson(AddressDTO dto) throws PersonNotFoundException{
+    public HttpStatus saveAddresForStoragedPerson(AddressDto dto) throws PersonNotFoundException{
         if(dto == null){
             return HttpStatus.BAD_REQUEST;
         }

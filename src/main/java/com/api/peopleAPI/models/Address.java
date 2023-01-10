@@ -4,6 +4,7 @@ import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,6 +42,7 @@ public class Address implements Serializable {
         this.number = number;
         this.cep = cep;
         this.city = city;
+        residentList = new ArrayList<>();
         addResident(person);
     }
 

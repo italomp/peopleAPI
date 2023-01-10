@@ -5,18 +5,17 @@ import com.api.peopleAPI.models.Address;
 import java.io.Serializable;
 import java.util.List;
 
-public class PersonDTO implements Serializable {
+public class PersonDto implements Serializable {
     private long id;
     private String name;
     private String birthDate;
     private List<Address> alternativeAddressList;
     private Address mainAddress;
 
-    public PersonDTO() {
+    public PersonDto() {
     }
 
-    public PersonDTO(long id, String name, String birthDate, Address mainAddress, List<Address> alternativeAddressList) {
-        this.id = id;
+    public PersonDto(String name, String birthDate, Address mainAddress, List<Address> alternativeAddressList) {
         this.name = name;
         this.birthDate = birthDate;
         this.mainAddress = mainAddress;

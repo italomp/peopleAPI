@@ -1,6 +1,6 @@
 package com.api.peopleAPI.controllers;
 
-import com.api.peopleAPI.dtos.PersonDTO;
+import com.api.peopleAPI.dtos.PersonDto;
 import com.api.peopleAPI.services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class PersonController {
     public PersonController(){}
 
     @PostMapping
-    public ResponseEntity<HttpStatus> save(@RequestBody PersonDTO personDTO){
+    public ResponseEntity<HttpStatus> save(@RequestBody PersonDto personDTO){
         return new ResponseEntity<>(personService.savePerson(personDTO));
     }
 }
