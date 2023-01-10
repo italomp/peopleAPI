@@ -3,19 +3,18 @@ package com.api.peopleAPI.models;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 /**
- * @residentList is the list of people who have that address (there may be
- * different people in a family, with the same address).
+ * @residentList is the list of people who have the address (there may be
+ * different people in a family, with the same address) minus the main residents.
  *
  * @mainResidentList is the list of people who have this address as their main address.
- *
- * The residentList should to contain the people of mainResidentList
  */
 @Entity
 @Table(name = "ADDRESS")
-public class Address {
+public class Address implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
@@ -25,10 +24,10 @@ public class Address {
     @Column(name = "NUMBER")
     private Integer number;
     @Column(name = "CEP")
-    private String cep;
+    private Integer cep;
     @Column(name = "CITY")
     private String city;
-    @ManyToMany(mappedBy = "addressList")
+    @ManyToMany(mappedBy = "alternativeAddressList")
     private List<Person> residentList;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "mainAddress", orphanRemoval = true)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
@@ -37,12 +36,12 @@ public class Address {
     public Address() {
     }
 
-    public Address(long id, String street, Integer number, String cep, String city) {
-        this.id = id;
+    public Address(String street, Integer number, Integer cep, String city, Person person) {
         this.street = street;
         this.number = number;
         this.cep = cep;
         this.city = city;
+        addResident(person);
     }
 
     public long getId() {
@@ -69,11 +68,11 @@ public class Address {
         this.number = number;
     }
 
-    public String getCep() {
+    public Integer getCep() {
         return cep;
     }
 
-    public void setCep(String cep) {
+    public void setCep(Integer cep) {
         this.cep = cep;
     }
 
@@ -89,7 +88,12 @@ public class Address {
         return residentList;
     }
 
-    public void setResidentList(List<Person> residentList) {
-        this.residentList = residentList;
+    public void addResident(Person person) {
+        if(person.getMainAddress() == null){
+            mainResidentList.add(person);
+        }
+        else{
+            residentList.add(person);
+        }
     }
 }

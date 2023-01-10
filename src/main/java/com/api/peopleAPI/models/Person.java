@@ -1,12 +1,13 @@
 package com.api.peopleAPI.models;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 @Table(name = "PERSON")
-public class Person {
+public class Person implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
@@ -19,7 +20,7 @@ public class Person {
     @JoinTable(name = "PERSON_ADDRESS",
             joinColumns = @JoinColumn(name = "PERSON_ID"),
             inverseJoinColumns = @JoinColumn(name = "ADDRESS_ID"))
-    private List<Address> addressList;
+    private List<Address> alternativeAddressList;
     @ManyToOne
     @JoinColumn(name = "MAIN_ADDRESS_ID")
     private Address mainAddress;
@@ -27,10 +28,11 @@ public class Person {
     public Person() {
     }
 
-    // The addressList should to contain the main address
-    public Person(String name, LocalDate birthDate, Address mainAddress, List<Address> addressList) {
+    public Person(String name, LocalDate birthDate, Address mainAddress, List<Address> alternativeAddressList) {
         this.name = name;
         this.birthDate = birthDate;
+        this.mainAddress = mainAddress;
+        this.alternativeAddressList = alternativeAddressList;
     }
 
     public String getName() {
@@ -53,16 +55,16 @@ public class Person {
         return id;
     }
 
-    public List<Address> getAddressList() {
-        return addressList;
+    public List<Address> getAlternativeAddressList() {
+        return alternativeAddressList;
     }
 
-    public void setAddressList(List<Address> addressList) {
-        this.addressList = addressList;
+    public void setAlternativeAddressList(List<Address> alternativeAddressList) {
+        this.alternativeAddressList = alternativeAddressList;
     }
 
     public void addNewAddress(Address newAddress){
-        this.addressList.add(newAddress);
+        this.alternativeAddressList.add(newAddress);
     }
 
     public Address getMainAddress() {
