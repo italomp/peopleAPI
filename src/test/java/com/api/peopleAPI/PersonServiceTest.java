@@ -32,7 +32,6 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     @Autowired
     @InjectMocks
     private PersonService personService;
-    private PersonDto personDto;
 
     @Test
     public void registerPersonWithAllAttributes(){
@@ -304,5 +303,31 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
                 PersonNotFoundException.class,
                 () -> personService.update(personWithInvalidIdDto), "Exception not thrown");
         verify(personRepository, times(1)).save(savedPerson);
+    }
+
+    @Test
+    public void getPersonDtoById(){
+        long personId = 1L;
+        long invalidId = 2L;
+        String personName = "Italo Modesto Pereira";
+        LocalDate personBirthdate = LocalDate.parse("1992-12-30");
+        Address personMainAddress = new Address();
+        List<Address> personAlternativeAddressList = new ArrayList<>();
+
+        Person person = new Person(
+                personId, personName, personBirthdate,personMainAddress,personAlternativeAddressList);
+        PersonDto personDto = PersonMapper.fromPersonToDto(person);
+
+        when(personRepository.findById(ArgumentMatchers.eq(personId))).thenReturn(Optional.of(person));
+        when(personRepository.findById(ArgumentMatchers.eq(invalidId))).thenThrow(
+                new PersonNotFoundException("There isn't user saved with entered ID"));
+
+        assertEquals(personDto, personService.getById(personId), "Person DTO was not returned");
+        assertThrows(
+                PersonNotFoundException.class,
+                () -> personService.getById(invalidId),
+                "Exception was not thrown");
+        verify(personRepository, times(1)).findById(personId);
+        verify(personRepository, times(1)).findById(invalidId);
     }
 }

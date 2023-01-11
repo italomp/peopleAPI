@@ -4,6 +4,7 @@ import com.api.peopleAPI.models.Address;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class PersonDto implements Serializable {
     private long id;
@@ -68,5 +69,18 @@ public class PersonDto implements Serializable {
 
     public void setMainAddress(Address mainAddress) {
         this.mainAddress = mainAddress;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PersonDto personDto = (PersonDto) o;
+        return id == personDto.id && name.equals(personDto.name) && birthdate.equals(personDto.birthdate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, birthdate);
     }
 }
