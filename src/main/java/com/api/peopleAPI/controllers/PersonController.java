@@ -26,7 +26,7 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PersonDto> getById(@PathVariable("id") String id){
+    public ResponseEntity<PersonDto> getById(@PathVariable("id") long id){
         return new ResponseEntity<>(personService.getById(id), HttpStatus.OK);
     }
 }
