@@ -12,8 +12,20 @@ public class PersonMapper {
             return null;
         return new Person(
                 dto.getName(),
-                LocalDate.parse(dto.getBirthDate()),
+                LocalDate.parse(dto.getBirthdate()),
                 dto.getMainAddress(),
                 dto.getAlternativeAddressList());
+    }
+
+    public static PersonDto fromPersonToDto(Person person){
+        if(person == null){
+            return null;
+        }
+        return new PersonDto(
+                person.getId(),
+                person.getName(),
+                person.getBirthdate() != null ? person.getBirthdate().toString() : null,
+                person.getMainAddress(),
+                person.getAlternativeAddressList());
     }
 }

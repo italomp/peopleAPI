@@ -20,7 +20,7 @@ public class Person implements Serializable {
     private String name;
     @Column(name = "BIRTH_DATE")
     @NotNull(message = "Person birth date can't be null")
-    private LocalDate birthDate;
+    private LocalDate birthdate;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "PERSON_ADDRESS",
             joinColumns = @JoinColumn(name = "PERSON_ID"),
@@ -33,9 +33,17 @@ public class Person implements Serializable {
     public Person() {
     }
 
-    public Person(String name, LocalDate birthDate, Address mainAddress, List<Address> alternativeAddressList) {
+    public Person(String name, LocalDate birthdate, Address mainAddress, List<Address> alternativeAddressList) {
         this.name = name;
-        this.birthDate = birthDate;
+        this.birthdate = birthdate;
+        this.mainAddress = mainAddress;
+        this.alternativeAddressList = alternativeAddressList;
+    }
+
+    public Person(long id, String name, LocalDate birthdate, Address mainAddress, List<Address> alternativeAddressList) {
+        this.id = id;
+        this.name = name;
+        this.birthdate = birthdate;
         this.mainAddress = mainAddress;
         this.alternativeAddressList = alternativeAddressList;
     }
@@ -48,16 +56,20 @@ public class Person implements Serializable {
         this.name = name;
     }
 
-    public LocalDate getBirthDate() {
-        return birthDate;
+    public LocalDate getBirthdate() {
+        return birthdate;
     }
 
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
+    public void setBirthdate(LocalDate birthdate) {
+        this.birthdate = birthdate;
     }
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public List<Address> getAlternativeAddressList() {
@@ -85,11 +97,11 @@ public class Person implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return name.equals(person.name) && birthDate.equals(person.birthDate);
+        return name.equals(person.name) && birthdate.equals(person.birthdate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, birthDate);
+        return Objects.hash(name, birthdate);
     }
 }

@@ -39,7 +39,7 @@ public class PersonService {
         if(dto.getName() == null) {
             throw new IllegalArgumentException("Person name can't be null");
         }
-        if(dto.getBirthDate() == null) {
+        if(dto.getBirthdate() == null) {
             throw new IllegalArgumentException("Person birthdate can't be null");
         }
     }
@@ -81,10 +81,11 @@ public class PersonService {
         if(personDto == null){
             return HttpStatus.BAD_REQUEST;
         }
+        checkNullAttributes(personDto);
         Person person = personRepository.findById(personDto.getId())
                 .orElseThrow(() -> new PersonNotFoundException("There isn't user saved with this ID"));
         person.setName(personDto.getName());
-        person.setBirthDate(LocalDate.parse(personDto.getBirthDate()));
+        person.setBirthdate(LocalDate.parse(personDto.getBirthdate()));
         person.setMainAddress(personDto.getMainAddress());
         person.setAlternativeAddressList(personDto.getAlternativeAddressList());
         saveNewPersonAddresses(person.getMainAddress(), person.getAlternativeAddressList()); // Poderia verificar se já existem

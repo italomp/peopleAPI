@@ -1,6 +1,7 @@
 package com.api.peopleAPI;
 
 import com.api.peopleAPI.dtos.PersonDto;
+import com.api.peopleAPI.exceptions.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
 import com.api.peopleAPI.repositories.PersonRepository;
@@ -14,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,7 +38,7 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     public void registerPersonWithAllAttributes(){
         // Set person attributes
         String personName = "Italo Modesto Pereira";
-        String personBirthDate = "1992-12-30";
+        String personBirthdate = "1992-12-30";
         Address personMainAddress = new Address();
         List<Address> personAlternativeAddressList = new ArrayList<>();
 
@@ -46,7 +49,7 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
         String AddressCity = "Campina Grande";
 
         // Set personDto
-        PersonDto personDto = new PersonDto(personName, personBirthDate,personMainAddress,personAlternativeAddressList);
+        PersonDto personDto = new PersonDto(personName, personBirthdate,personMainAddress,personAlternativeAddressList);
 
         // Set Person
         Person person = PersonMapper.fromDtoToPerson(personDto);
@@ -74,12 +77,12 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     public void registerPersonWithoutAddresses(){
         // Set person attributes
         String personName = "Italo Modesto Pereira";
-        String personBirthDate = "1992-12-30";
+        String personBirthdate = "1992-12-30";
         Address personMainAddress = null;
         List<Address> personAlternativeAddressList = null;
 
         // Set personDto
-        PersonDto personDto = new PersonDto(personName, personBirthDate,personMainAddress,personAlternativeAddressList);
+        PersonDto personDto = new PersonDto(personName, personBirthdate,personMainAddress,personAlternativeAddressList);
 
         // Set Person
         Person person = PersonMapper.fromDtoToPerson(personDto);
@@ -97,12 +100,12 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     public void throwExceptionWhenAttempRegisterPersonWithNullNameOrNullBirthDate(){
         // Set person attributes
         String personName = null;
-        String personBirthDate = "1992-12-30";
+        String personBirthdate = "1992-12-30";
         Address personMainAddress = null;
         List<Address> personAlternativeAddressList = null;
 
         // Set personDto
-        PersonDto personDto = new PersonDto(personName, personBirthDate,personMainAddress,personAlternativeAddressList);
+        PersonDto personDto = new PersonDto(personName, personBirthdate,personMainAddress,personAlternativeAddressList);
 
         // Set Person
         Person person = PersonMapper.fromDtoToPerson(personDto);
@@ -119,7 +122,7 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
         verify(personRepository, times(0)).save(person);
 
         person.setName("Italo Modesto Pereira");
-        person.setBirthDate(null);
+        person.setBirthdate(null);
 
         // Null birthdate Assertions
         assertThrows(
@@ -133,5 +136,173 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     public void returnBadRequestWhenAttemptRegisterNullPerson(){
         PersonDto personDto = null;
         assertEquals(HttpStatus.BAD_REQUEST, personService.savePerson(personDto), "Exception don't was thrown");
+    }
+
+    @Test
+    public void updatePersonGivingAllAttributresCerrectly(){
+        // Set saved person attributes
+        long personId = 1L;
+        String personName = "Italo Modesto Pereira";
+        LocalDate personBirthdate = LocalDate.parse("1992-12-30");
+        Address personMainAddress = new Address();
+        List<Address> personAlternativeAddressList = new ArrayList<>();
+        Person savedPerson = new Person(
+                personId, personName, personBirthdate, personMainAddress, personAlternativeAddressList);
+
+        // Set address attributes
+        String AddressStreet = "Rua 1";
+        Integer AddressNumber = 11;
+        Integer AddressCep = 58429120;
+        String AddressCity = "Campina Grande";
+        personMainAddress = new Address(AddressStreet, AddressNumber, AddressCep, AddressCity, savedPerson);
+        personAlternativeAddressList = List.of(
+                new Address(AddressStreet, AddressNumber + 1, AddressCep, AddressCity, savedPerson),
+                new Address(AddressStreet, AddressNumber + 2, AddressCep, AddressCity, savedPerson)
+        );
+        savedPerson.setMainAddress(personMainAddress);
+        savedPerson.setAlternativeAddressList(personAlternativeAddressList);
+
+        // Set updated person
+        Person updatedPerson = new Person();
+        updatedPerson.setId(savedPerson.getId());
+        updatedPerson.setName("Italo Pereira");
+        updatedPerson.setBirthdate(LocalDate.parse("1992-12-31"));
+        updatedPerson.setMainAddress(
+                new Address(AddressStreet, AddressNumber + 1, AddressCep, AddressCity, savedPerson));
+        updatedPerson.setAlternativeAddressList(List.of(
+                new Address(AddressStreet, AddressNumber + 2, AddressCep, AddressCity, savedPerson),
+                new Address(AddressStreet, AddressNumber + 3, AddressCep, AddressCity, savedPerson)));
+
+        PersonDto updatedPersonDto = PersonMapper.fromPersonToDto(updatedPerson);
+
+        when(personRepository.findById(personId)).thenReturn(Optional.of(savedPerson));
+        when(personRepository.save(ArgumentMatchers.eq(updatedPerson))).thenReturn(updatedPerson);
+
+        assertEquals(HttpStatus.OK, personService.update(updatedPersonDto), "Person was not updated");
+        verify(personRepository, times(1)).findById(personId);
+        verify(personRepository, times(1)).save(updatedPerson);
+    }
+
+    @Test
+    public void updatePersonGivingNullNameAndBirthdate(){
+        // Set saved person attributes
+        long personId = 1L;
+        String personName = "Italo Modesto Pereira";
+        LocalDate personBirthdate = LocalDate.parse("1992-12-30");
+        Address personMainAddress = new Address();
+        List<Address> personAlternativeAddressList = new ArrayList<>();
+        Person savedPerson = new Person(
+                personId, personName, personBirthdate, personMainAddress, personAlternativeAddressList);
+
+        // Set address attributes
+        String AddressStreet = "Rua 1";
+        Integer AddressNumber = 11;
+        Integer AddressCep = 58429120;
+        String AddressCity = "Campina Grande";
+        personMainAddress = new Address(AddressStreet, AddressNumber, AddressCep, AddressCity, savedPerson);
+        personAlternativeAddressList = List.of(
+                new Address(AddressStreet, AddressNumber + 1, AddressCep, AddressCity, savedPerson),
+                new Address(AddressStreet, AddressNumber + 2, AddressCep, AddressCity, savedPerson)
+        );
+        savedPerson.setMainAddress(personMainAddress);
+        savedPerson.setAlternativeAddressList(personAlternativeAddressList);
+
+        // Set updated person
+        Person updatedPerson = new Person();
+        updatedPerson.setId(savedPerson.getId());
+        updatedPerson.setName(null);
+        updatedPerson.setBirthdate(null);
+        updatedPerson.setMainAddress(
+                new Address(AddressStreet, AddressNumber + 1, AddressCep, AddressCity, savedPerson));
+        updatedPerson.setAlternativeAddressList(List.of(
+                new Address(AddressStreet, AddressNumber + 2, AddressCep, AddressCity, savedPerson),
+                new Address(AddressStreet, AddressNumber + 3, AddressCep, AddressCity, savedPerson)));
+
+        PersonDto updatedPersonDto = PersonMapper.fromPersonToDto(updatedPerson);
+
+        when(personRepository.findById(personId)).thenReturn(Optional.of(savedPerson));
+        when(personRepository.save(ArgumentMatchers.eq(updatedPerson))).thenThrow(new IllegalArgumentException());
+
+        assertThrows(
+                IllegalArgumentException.class ,
+                () -> personService.update(updatedPersonDto),
+                "Exception was not thrown");
+        verify(personRepository, times(0)).findById(personId);
+        verify(personRepository, times(0)).save(updatedPerson);
+    }
+
+    @Test
+    public void updatePersongivingNullAddresses(){
+        // Set saved person attributes
+        long personId = 1L;
+        String personName = "Italo Modesto Pereira";
+        LocalDate personBirthdate = LocalDate.parse("1992-12-30");
+        Address personMainAddress = new Address();
+        List<Address> personAlternativeAddressList = new ArrayList<>();
+        Person savedPerson = new Person(
+                personId, personName, personBirthdate, personMainAddress, personAlternativeAddressList);
+
+        // Set address attributes
+        String AddressStreet = "Rua 1";
+        Integer AddressNumber = 11;
+        Integer AddressCep = 58429120;
+        String AddressCity = "Campina Grande";
+        personMainAddress = new Address(AddressStreet, AddressNumber, AddressCep, AddressCity, savedPerson);
+        personAlternativeAddressList = List.of(
+                new Address(AddressStreet, AddressNumber + 1, AddressCep, AddressCity, savedPerson),
+                new Address(AddressStreet, AddressNumber + 2, AddressCep, AddressCity, savedPerson)
+        );
+        savedPerson.setMainAddress(personMainAddress);
+        savedPerson.setAlternativeAddressList(personAlternativeAddressList);
+
+        // Set updated person
+        Person updatedPerson = new Person();
+        updatedPerson.setId(savedPerson.getId());
+        updatedPerson.setName("Italo Pereira");
+        updatedPerson.setBirthdate(LocalDate.parse("1992-12-31"));
+        updatedPerson.setMainAddress(null);
+        updatedPerson.setAlternativeAddressList(null);
+
+        PersonDto updatedPersonDto = PersonMapper.fromPersonToDto(updatedPerson);
+
+        when(personRepository.findById(personId)).thenReturn(Optional.of(savedPerson));
+        when(personRepository.save(ArgumentMatchers.eq(updatedPerson))).thenReturn(updatedPerson);
+
+        assertEquals(HttpStatus.OK, personService.update(updatedPersonDto), "Person was not updated");
+        verify(personRepository, times(1)).findById(personId);
+        verify(personRepository, times(1)).save(updatedPerson);
+    }
+    @Test
+    public void returnBadRequestWhenUpdatePersonGivingNullPerson(){
+        assertEquals(HttpStatus.BAD_REQUEST, personService.update(null), "Bad request not returned");
+    }
+
+    @Test
+    public void throwsExceptionWhenUpdatePersonGivingInvalidId(){
+        // Set valid person
+        long personId = 1L;
+        String personName = "Italo Modesto Pereira";
+        String personBirthdate = "1992-12-30";
+        Address personMainAddress = new Address();
+        List<Address> personAlternativeAddressList = new ArrayList<>();
+        PersonDto savedPersonDto = new PersonDto(
+                personId, personName, personBirthdate, personMainAddress, personAlternativeAddressList);
+        Person savedPerson = PersonMapper.fromDtoToPerson(savedPersonDto);
+
+        // Set invalid person
+        long invalidId = 2L;
+        PersonDto personWithInvalidIdDto = new PersonDto(
+                invalidId, personName, personBirthdate, personMainAddress, personAlternativeAddressList
+        );
+
+        when(personRepository.findById(ArgumentMatchers.eq(personId))).thenReturn(Optional.of(savedPerson));
+        when(personRepository.findById(ArgumentMatchers.eq(invalidId))).thenThrow(
+                new PersonNotFoundException("There isn't user saved with entered ID"));
+
+        assertEquals(HttpStatus.OK, personService.update(savedPersonDto), "Person not updated");
+        assertThrows(
+                PersonNotFoundException.class,
+                () -> personService.update(personWithInvalidIdDto), "Exception not thrown");
+        verify(personRepository, times(1)).save(savedPerson);
     }
 }

@@ -8,16 +8,24 @@ import java.util.List;
 public class PersonDto implements Serializable {
     private long id;
     private String name;
-    private String birthDate;
+    private String birthdate;
     private List<Address> alternativeAddressList;
     private Address mainAddress;
 
     public PersonDto() {
     }
 
-    public PersonDto(String name, String birthDate, Address mainAddress, List<Address> alternativeAddressList) {
+    public PersonDto(String name, String birthdate, Address mainAddress, List<Address> alternativeAddressList) {
         this.name = name;
-        this.birthDate = birthDate;
+        this.birthdate = birthdate;
+        this.mainAddress = mainAddress;
+        this.alternativeAddressList = alternativeAddressList;
+    }
+
+    public PersonDto(long id, String name, String birthdate, Address mainAddress, List<Address> alternativeAddressList) {
+        this.id = id;
+        this.name = name;
+        this.birthdate = birthdate;
         this.mainAddress = mainAddress;
         this.alternativeAddressList = alternativeAddressList;
     }
@@ -38,12 +46,12 @@ public class PersonDto implements Serializable {
         this.name = name;
     }
 
-    public String getBirthDate() {
-        return birthDate;
+    public String getBirthdate() {
+        return birthdate;
     }
 
-    public void setBirthDate(String birthDate) {
-        this.birthDate = birthDate;
+    public void setBirthdate(String birthdate) {
+        this.birthdate = birthdate;
     }
 
     public List<Address> getAlternativeAddressList() {
