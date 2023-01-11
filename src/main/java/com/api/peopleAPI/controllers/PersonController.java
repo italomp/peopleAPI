@@ -24,4 +24,9 @@ public class PersonController {
     public ResponseEntity<HttpStatus> update(@RequestBody PersonDto personDto){
         return new ResponseEntity<>(personService.update(personDto));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PersonDto> getById(@PathVariable("id") String id){
+        return new ResponseEntity<>(personService.getById(id), HttpStatus.OK);
+    }
 }

@@ -92,4 +92,11 @@ public class PersonService {
         personRepository.save(person);
         return HttpStatus.OK;
     }
+
+    public PersonDto getById(String id) {
+        long personId = Long.parseLong(id);
+        Person person = personRepository.findById(personId).orElseThrow(
+                () ->new PersonNotFoundException("There isn't user saved with entered ID"));
+        return PersonMapper.fromPersonToDto(person);
+    }
 }
