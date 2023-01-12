@@ -1,8 +1,5 @@
 package com.api.peopleAPI.models;
 
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -27,7 +24,6 @@ public class Person implements Serializable {
     @JoinTable(name = "PERSON_ADDRESS",
             joinColumns = @JoinColumn(name = "PERSON_ID"),
             inverseJoinColumns = @JoinColumn(name = "ADDRESS_ID"))
-    @JsonManagedReference
     private List<Address> alternativeAddressList;
     @ManyToOne
     @JoinColumn(name = "MAIN_ADDRESS_ID")

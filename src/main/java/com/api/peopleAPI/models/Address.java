@@ -1,6 +1,5 @@
 package com.api.peopleAPI.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -30,7 +29,6 @@ public class Address implements Serializable {
     @Column(name = "CITY")
     private String city;
     @ManyToMany(mappedBy = "alternativeAddressList")
-    @JsonBackReference
     private List<Person> residentList;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "mainAddress", orphanRemoval = true)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
@@ -45,6 +43,7 @@ public class Address implements Serializable {
         this.cep = cep;
         this.city = city;
         residentList = new ArrayList<>();
+        mainResidentList = new ArrayList<>();
         addResident(person);
     }
 

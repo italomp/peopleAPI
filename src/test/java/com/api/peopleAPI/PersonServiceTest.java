@@ -1,5 +1,6 @@
 package com.api.peopleAPI;
 
+import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
 import com.api.peopleAPI.exceptions.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
@@ -7,7 +8,9 @@ import com.api.peopleAPI.models.Person;
 import com.api.peopleAPI.repositories.PersonRepository;
 import com.api.peopleAPI.services.AddressService;
 import com.api.peopleAPI.services.PersonService;
+import com.api.peopleAPI.utils.AddressMapper;
 import com.api.peopleAPI.utils.PersonMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
@@ -34,86 +37,65 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     private PersonService personService;
 
     @Test
-    public void registerPersonWithAllAttributes(){
-        // Set person attributes
-        String personName = "Italo Modesto Pereira";
-        String personBirthdate = "1992-12-30";
-        Address personMainAddress = new Address();
-        List<Address> personAlternativeAddressList = new ArrayList<>();
-
-        // Set address attributes
-        String AddressStreet = "Rua 1";
-        Integer AddressNumber = 11;
-        Integer AddressCep = 58429120;
-        String AddressCity = "Campina Grande";
-
-        // Set personDto
-        PersonDto personDto = new PersonDto(personName, personBirthdate,personMainAddress,personAlternativeAddressList);
-
-        // Set Person
-        Person person = PersonMapper.fromDtoToPerson(personDto);
-        personMainAddress = new Address(AddressStreet, AddressNumber, AddressCep, AddressCity, person);
-        personAlternativeAddressList = List.of(
-                new Address(AddressStreet, AddressNumber + 1, AddressCep, AddressCity, person),
-                new Address(AddressStreet, AddressNumber + 2, AddressCep, AddressCity, person)
+    @DisplayName("Should save the person")
+    public void savePersonTest(){
+        String name = "Italo Modesto Pereira";
+        String birthdate = "1992-12-30";
+        String street = "Rua 1";
+        Integer number = 11;
+        Integer cep = 58429120;
+        String city = "Campina Grande";
+        AddressDto mainAddressDto = new AddressDto(street, number, cep, city);
+        List<AddressDto> alternativeAddressDtoList = List.of(
+                new AddressDto(street, number + 1, cep, city),
+                new AddressDto(street, number + 2, cep, city)
         );
-        person.setMainAddress(personMainAddress);
-        person.setAlternativeAddressList(personAlternativeAddressList);
+        PersonDto personDto = new PersonDto(name, birthdate, mainAddressDto, alternativeAddressDtoList);
 
-        personDto.setMainAddress(personMainAddress);
-        personDto.setAlternativeAddressList(personAlternativeAddressList);
+        Person person = PersonMapper.fromDtoToPerson(personDto);
+        Address mainAddress = AddressMapper.fromDtoToAddress(mainAddressDto, person);
+        List<Address> alternativeAddressList = AddressMapper.fromDtoListToAddressList(alternativeAddressDtoList, person);
+        person.setMainAddress(mainAddress);
+        person.setAlternativeAddressList(alternativeAddressList);
 
-        // Set personRepository behaviors
         when(personRepository.save(ArgumentMatchers.eq(person))).thenReturn(person);
         when(personRepository.save(null)).thenThrow(new IllegalArgumentException());
 
-        // Assertions
         assertEquals(HttpStatus.CREATED, personService.savePerson(personDto), "Person don't created");
         verify(personRepository, times(1)).save(person);
     }
 
     @Test
-    public void registerPersonWithoutAddresses(){
-        // Set person attributes
+    @DisplayName("Should save the person without his address")
+    public void savePersonWithoutAddressesTest(){
         String personName = "Italo Modesto Pereira";
         String personBirthdate = "1992-12-30";
-        Address personMainAddress = null;
-        List<Address> personAlternativeAddressList = null;
-
-        // Set personDto
+        AddressDto personMainAddress = null;
+        List<AddressDto> personAlternativeAddressList = null;
         PersonDto personDto = new PersonDto(personName, personBirthdate,personMainAddress,personAlternativeAddressList);
-
-        // Set Person
         Person person = PersonMapper.fromDtoToPerson(personDto);
 
-        // Set personRepository behaviors
         when(personRepository.save(ArgumentMatchers.eq(person))).thenReturn(person);
         when(personRepository.save(null)).thenThrow(new IllegalArgumentException());
 
-        // Assertions
         assertEquals(HttpStatus.CREATED, personService.savePerson(personDto), "Person don't created");
         verify(personRepository, times(1)).save(person);
     }
 
     @Test
-    public void throwExceptionWhenAttempRegisterPersonWithNullNameOrNullBirthDate(){
-        // Set person attributes
+    @DisplayName("Should to throw exception when attempt save person with null name or birthdate")
+    public void savePersonWithNullNameOrBirthdateTest(){
         String personName = null;
         String personBirthdate = "1992-12-30";
-        Address personMainAddress = null;
-        List<Address> personAlternativeAddressList = null;
+        AddressDto personMainAddress = null;
+        List<AddressDto> personAlternativeAddressList = null;
 
-        // Set personDto
         PersonDto personDto = new PersonDto(personName, personBirthdate,personMainAddress,personAlternativeAddressList);
-
-        // Set Person
         Person person = PersonMapper.fromDtoToPerson(personDto);
 
-        // Set personRepository behaviors
         when(personRepository.save(ArgumentMatchers.eq(person))).thenReturn(person);
         when(personRepository.save(null)).thenThrow(new IllegalArgumentException());
 
-        // Null name assertions
         assertThrows(
                 IllegalArgumentException.class,
                 () -> personService.savePerson(personDto),
@@ -123,7 +105,6 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
         person.setName("Italo Modesto Pereira");
         person.setBirthdate(null);
 
-        // Null birthdate Assertions
         assertThrows(
                 IllegalArgumentException.class,
                 () -> personService.savePerson(personDto),
@@ -132,13 +113,15 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     }
 
     @Test
-    public void returnBadRequestWhenAttemptRegisterNullPerson(){
+    @DisplayName("Should to return a bad request status code when attempt save a null person")
+    public void saveNullPersonTest(){
         PersonDto personDto = null;
         assertEquals(HttpStatus.BAD_REQUEST, personService.savePerson(personDto), "Exception don't was thrown");
     }
 
     @Test
-    public void updatePersonGivingAllAttributresCerrectly(){
+    @DisplayName("Should to update the person")
+    public void updatePersonTest(){
         // Set saved person attributes
         long personId = 1L;
         String personName = "Italo Modesto Pereira";
@@ -183,7 +166,8 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
     }
 
     @Test
-    public void updatePersonGivingNullNameAndBirthdate(){
+    @DisplayName("Should to throw a exception when attempt update a person giving null name or birthdate")
+    public void updatePersonGivingNullNameAndBirthdateTest(){
         // Set saved person attributes
         long personId = 1L;
         String personName = "Italo Modesto Pereira";
@@ -226,12 +210,13 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
                 IllegalArgumentException.class ,
                 () -> personService.update(updatedPersonDto),
                 "Exception was not thrown");
-        verify(personRepository, times(0)).findById(personId);
+        verify(personRepository, times(1)).findById(personId);
         verify(personRepository, times(0)).save(updatedPerson);
     }
 
     @Test
-    public void updatePersongivingNullAddresses(){
+    @DisplayName("Should to save the person with his null addresses")
+    public void updatePersonGivingNullAddressesTest(){
         // Set saved person attributes
         long personId = 1L;
         String personName = "Italo Modesto Pereira";
@@ -272,29 +257,31 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
         verify(personRepository, times(1)).save(updatedPerson);
     }
     @Test
-    public void returnBadRequestWhenUpdatePersonGivingNullPerson(){
+    @DisplayName("Should to return a bad request status code when attempt update a person giving a null person")
+    public void updatePersonGivingNullPersonTest(){
         assertEquals(HttpStatus.BAD_REQUEST, personService.update(null), "Bad request not returned");
     }
 
     @Test
-    public void throwsExceptionWhenUpdatePersonGivingInvalidId(){
-        // Set valid person
-        long personId = 1L;
+    @DisplayName("Should to throw a exception when attempt update a person giving a invalid id")
+    public void updatePersonGivingInvalidIdTest(){
+        // Set person with valid id
+        long validId = 1L;
         String personName = "Italo Modesto Pereira";
         String personBirthdate = "1992-12-30";
-        Address personMainAddress = new Address();
-        List<Address> personAlternativeAddressList = new ArrayList<>();
+        AddressDto personMainAddress = new AddressDto();
+        List<AddressDto> personAlternativeAddressList = new ArrayList<>();
         PersonDto savedPersonDto = new PersonDto(
-                personId, personName, personBirthdate, personMainAddress, personAlternativeAddressList);
+                validId, personName, personBirthdate, personMainAddress, personAlternativeAddressList);
         Person savedPerson = PersonMapper.fromDtoToPerson(savedPersonDto);
 
-        // Set invalid person
+        // Set person with invalid id
         long invalidId = 2L;
         PersonDto personWithInvalidIdDto = new PersonDto(
                 invalidId, personName, personBirthdate, personMainAddress, personAlternativeAddressList
         );
 
-        when(personRepository.findById(ArgumentMatchers.eq(personId))).thenReturn(Optional.of(savedPerson));
+        when(personRepository.findById(ArgumentMatchers.eq(validId))).thenReturn(Optional.of(savedPerson));
         when(personRepository.findById(ArgumentMatchers.eq(invalidId))).thenThrow(
                 new PersonNotFoundException("There isn't user saved with entered ID"));
 
@@ -303,11 +290,14 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
                 PersonNotFoundException.class,
                 () -> personService.update(personWithInvalidIdDto), "Exception not thrown");
         verify(personRepository, times(1)).save(savedPerson);
+        verify(personRepository, times(1)).findById(validId);
+        verify(personRepository, times(1)).findById(invalidId);
     }
 
     @Test
+    @DisplayName("Should to return a person when giving a valid id and to throw exception when giving an invalid id")
     public void getPersonDtoById(){
-        long personId = 1L;
+        long validId = 1L;
         long invalidId = 2L;
         String personName = "Italo Modesto Pereira";
         LocalDate personBirthdate = LocalDate.parse("1992-12-30");
@@ -315,19 +305,19 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
         List<Address> personAlternativeAddressList = new ArrayList<>();
 
         Person person = new Person(
-                personId, personName, personBirthdate,personMainAddress,personAlternativeAddressList);
+                validId, personName, personBirthdate,personMainAddress,personAlternativeAddressList);
         PersonDto personDto = PersonMapper.fromPersonToDto(person);
 
-        when(personRepository.findById(ArgumentMatchers.eq(personId))).thenReturn(Optional.of(person));
+        when(personRepository.findById(ArgumentMatchers.eq(validId))).thenReturn(Optional.of(person));
         when(personRepository.findById(ArgumentMatchers.eq(invalidId))).thenThrow(
                 new PersonNotFoundException("There isn't user saved with entered ID"));
 
-        assertEquals(personDto, personService.getById(personId), "Person DTO was not returned");
+        assertEquals(personDto, personService.getById(validId), "Person DTO was not returned");
         assertThrows(
                 PersonNotFoundException.class,
                 () -> personService.getById(invalidId),
                 "Exception was not thrown");
-        verify(personRepository, times(1)).findById(personId);
+        verify(personRepository, times(1)).findById(validId);
         verify(personRepository, times(1)).findById(invalidId);
     }
 }

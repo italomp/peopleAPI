@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/person")
 public class PersonController {
@@ -16,17 +18,22 @@ public class PersonController {
     public PersonController(){}
 
     @PostMapping
-    public ResponseEntity<HttpStatus> save(@RequestBody PersonDto personDTO){
-        return new ResponseEntity<>(personService.savePerson(personDTO));
+    public ResponseEntity<HttpStatus> save(@RequestBody PersonDto dto){
+        return new ResponseEntity<>(personService.savePerson(dto));
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> update(@RequestBody PersonDto personDto){
-        return new ResponseEntity<>(personService.update(personDto));
+    public ResponseEntity<HttpStatus> update(@RequestBody PersonDto dto){
+        return new ResponseEntity<>(personService.update(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> getById(@PathVariable("id") long id){
         return new ResponseEntity<>(personService.getById(id), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PersonDto>> getAll(){
+        return new ResponseEntity<>(personService.getAll(), HttpStatus.OK);
     }
 }

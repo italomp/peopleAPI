@@ -8,16 +8,14 @@ public class AddressDto implements Serializable {
     private Integer number;
     private Integer cep;
     private String city;
-    private long personId;
 
     public AddressDto(){}
 
-    public AddressDto(String street, Integer number, Integer cep, String city, long personId) {
+    public AddressDto(String street, Integer number, Integer cep, String city) {
         this.street = street;
         this.number = number;
         this.cep = cep;
         this.city = city;
-        this.personId = personId;
     }
 
     public long getId() {
@@ -60,11 +58,4 @@ public class AddressDto implements Serializable {
         this.city = city;
     }
 
-    public long getPersonId() {
-        return personId;
-    }
-
-    public void setPersonId(long personId) {
-        this.personId = personId;
-    }
 }

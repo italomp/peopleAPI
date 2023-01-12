@@ -1,7 +1,5 @@
 package com.api.peopleAPI.dtos;
 
-import com.api.peopleAPI.models.Address;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
@@ -10,20 +8,20 @@ public class PersonDto implements Serializable {
     private long id;
     private String name;
     private String birthdate;
-    private List<Address> alternativeAddressList;
-    private Address mainAddress;
+    private List<AddressDto> alternativeAddressList;
+    private AddressDto mainAddress;
 
     public PersonDto() {
     }
 
-    public PersonDto(String name, String birthdate, Address mainAddress, List<Address> alternativeAddressList) {
+    public PersonDto(String name, String birthdate, AddressDto mainAddress, List<AddressDto> alternativeAddressList) {
         this.name = name;
         this.birthdate = birthdate;
         this.mainAddress = mainAddress;
         this.alternativeAddressList = alternativeAddressList;
     }
 
-    public PersonDto(long id, String name, String birthdate, Address mainAddress, List<Address> alternativeAddressList) {
+    public PersonDto(long id, String name, String birthdate, AddressDto mainAddress, List<AddressDto> alternativeAddressList) {
         this.id = id;
         this.name = name;
         this.birthdate = birthdate;
@@ -55,19 +53,19 @@ public class PersonDto implements Serializable {
         this.birthdate = birthdate;
     }
 
-    public List<Address> getAlternativeAddressList() {
+    public List<AddressDto> getAlternativeAddressList() {
         return alternativeAddressList;
     }
 
-    public void setAlternativeAddressList(List<Address> addressList) {
+    public void setAlternativeAddressList(List<AddressDto> addressList) {
         this.alternativeAddressList = addressList;
     }
 
-    public Address getMainAddress() {
+    public AddressDto getMainAddress() {
         return mainAddress;
     }
 
-    public void setMainAddress(Address mainAddress) {
+    public void setMainAddress(AddressDto mainAddress) {
         this.mainAddress = mainAddress;
     }
 

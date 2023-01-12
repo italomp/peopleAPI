@@ -1,19 +1,19 @@
 package com.api.peopleAPI.services;
 
-import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
 import com.api.peopleAPI.exceptions.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
 import com.api.peopleAPI.repositories.PersonRepository;
+import com.api.peopleAPI.utils.AddressMapper;
 import com.api.peopleAPI.utils.PersonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PersonService {
@@ -28,14 +28,14 @@ public class PersonService {
         if(dto == null){
             return HttpStatus.BAD_REQUEST;
         }
-        checkNullAttributes(dto);
-        saveNewPersonAddresses(dto.getMainAddress(), dto.getAlternativeAddressList());
-        Person newPerson = PersonMapper.fromDtoToPerson(dto);
-        personRepository.save(newPerson);
+        Person person = PersonMapper.fromDtoToPerson(dto);
+        checkNullAttributes(person);
+        saveNewPersonAddresses(person.getMainAddress(), person.getAlternativeAddressList());
+        personRepository.save(person);
         return HttpStatus.CREATED;
     }
 
-    public void checkNullAttributes(PersonDto dto){
+    public void checkNullAttributes(Person dto){
         if(dto.getName() == null) {
             throw new IllegalArgumentException("Person name can't be null");
         }
@@ -50,45 +50,31 @@ public class PersonService {
             addressService.save(mainAddres);
         }
         if(alternativeAddresses != null){
-            alternativeAddresses.forEach(address -> {
+            for(Address address: alternativeAddresses){
                 if(address != null) {
                     addressService.save(address);
                 }
-            });
+            }
         }
     }
 
-    // Esse método implementará a funcionalidade de salvar um endereço para uma pessoa já cadastrada.
-    public HttpStatus saveAddresForStoragedPerson(AddressDto dto) throws PersonNotFoundException{
+    public HttpStatus update(PersonDto dto) {
         if(dto == null){
             return HttpStatus.BAD_REQUEST;
         }
-        Optional<Person> residentOpt = personRepository.findById(dto.getPersonId());
-        if(residentOpt.isEmpty()){
-            throw new PersonNotFoundException("There isn't user saved with entered ID");
-        }
-        Address newAddress = new Address(
-                dto.getStreet(),
-                dto.getNumber(),
-                dto.getCep(),
-                dto.getCity(),
-                residentOpt.get());
-        addressService.save(newAddress);
-        return HttpStatus.CREATED;
-    }
 
-    public HttpStatus update(PersonDto personDto) {
-        if(personDto == null){
-            return HttpStatus.BAD_REQUEST;
-        }
-        checkNullAttributes(personDto);
-        Person person = personRepository.findById(personDto.getId())
+        Person person = personRepository.findById(dto.getId())
                 .orElseThrow(() -> new PersonNotFoundException("There isn't user saved with this ID"));
-        person.setName(personDto.getName());
-        person.setBirthdate(LocalDate.parse(personDto.getBirthdate()));
-        person.setMainAddress(personDto.getMainAddress());
-        person.setAlternativeAddressList(personDto.getAlternativeAddressList());
+
+        Address mainAddress = AddressMapper.fromDtoToAddress(dto.getMainAddress(), person);
+        List<Address> alternativeAddressList = AddressMapper.fromDtoListToAddressList(dto.getAlternativeAddressList(), person);
+
+        person.setName(dto.getName());
+        person.setBirthdate(dto.getBirthdate() != null ? LocalDate.parse(dto.getBirthdate()) : null);
+        person.setMainAddress(mainAddress);
+        person.setAlternativeAddressList(alternativeAddressList);
         saveNewPersonAddresses(person.getMainAddress(), person.getAlternativeAddressList()); // Poderia verificar se já existem
+        checkNullAttributes(person);
         personRepository.save(person);
         return HttpStatus.OK;
     }
@@ -97,5 +83,15 @@ public class PersonService {
         Person person = personRepository.findById(id).orElseThrow(
                 () ->new PersonNotFoundException("There isn't user saved with entered ID"));
         return PersonMapper.fromPersonToDto(person);
+    }
+
+    public List<PersonDto> getAll() {
+        List<Person> personList = personRepository.findAll();
+        List<PersonDto> personDtoList = new ArrayList<>();
+        personList.forEach(person -> {
+            PersonDto personDto = PersonMapper.fromPersonToDto(person);
+            personDtoList.add(personDto);
+        });
+        return personDtoList;
     }
 }
