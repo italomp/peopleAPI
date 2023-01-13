@@ -29,13 +29,22 @@ public class PersonService {
             return HttpStatus.BAD_REQUEST;
         }
         Person person = PersonMapper.fromDtoToPerson(dto);
-        checkNullAttributes(person);
+        removeReceivedAddressDuplicate(person);
+        saveChecks(person);
         saveNewPersonAddresses(person.getMainAddress(), person.getAlternativeAddressList());
         personRepository.save(person);
         return HttpStatus.CREATED;
     }
 
-    public void checkNullAttributes(Person dto){
+    public void saveChecks(Person person){
+        List<Address> existentAddressList = addressService.getAll();
+        nullAttributesCheck(person);
+        if(existentAddressList.isEmpty()) return;
+        existentMainAddressCheck(existentAddressList, person);
+        existentAltertativeAddressCheck(existentAddressList, person);
+    }
+
+    public void nullAttributesCheck(Person dto){
         if(dto.getName() == null) {
             throw new IllegalArgumentException("Person name can't be null");
         }
@@ -44,18 +53,42 @@ public class PersonService {
         }
     }
 
-    // Permite que endereços repetidos sejam salvos
+    public void existentMainAddressCheck(List<Address> existentAddressList, Person person){
+        Address mainAddress = addressService.getStoragedMainAddress(existentAddressList, person.getMainAddress());
+        if(mainAddress != null){
+            person.setMainAddress(mainAddress);
+        }
+    }
+
+    public void existentAltertativeAddressCheck(List<Address> existentAddressList, Person person){
+        List<Address> storagedAlternativeAddressList = addressService.getStoragedAlternativeAddress(
+                existentAddressList, person.getAlternativeAddressList());
+        for(Address personAlternativeAddress: person.getAlternativeAddressList()){
+            if(!storagedAlternativeAddressList.contains(personAlternativeAddress)){
+                storagedAlternativeAddressList.add(personAlternativeAddress);
+            }
+        }
+        person.setAlternativeAddressList(storagedAlternativeAddressList);
+    }
+
     public void saveNewPersonAddresses(Address mainAddres, List<Address> alternativeAddresses){
         if(mainAddres != null){
             addressService.save(mainAddres);
         }
         if(alternativeAddresses != null){
-            for(Address address: alternativeAddresses){
-                if(address != null) {
-                    addressService.save(address);
+            for(int i = 0; i < alternativeAddresses.size(); i++){
+                Address currAddress = alternativeAddresses.get(i);
+                if(currAddress != null){
+                    addressService.save(currAddress);
                 }
             }
         }
+    }
+
+    public void removeReceivedAddressDuplicate(Person person){
+        List<Address> alternativeAddressListWithoutDuplicate = addressService
+                .getNonDuplicateAlternativeAddressList(person.getMainAddress(), person.getAlternativeAddressList());
+        person.setAlternativeAddressList(alternativeAddressListWithoutDuplicate);
     }
 
     public HttpStatus update(PersonDto dto) {
@@ -74,7 +107,7 @@ public class PersonService {
         person.setMainAddress(mainAddress);
         person.setAlternativeAddressList(alternativeAddressList);
         saveNewPersonAddresses(person.getMainAddress(), person.getAlternativeAddressList()); // Poderia verificar se já existem
-        checkNullAttributes(person);
+        nullAttributesCheck(person);
         personRepository.save(person);
         return HttpStatus.OK;
     }

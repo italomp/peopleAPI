@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @residentList is the list of people who have the address (there may be
@@ -91,6 +92,18 @@ public class Address implements Serializable {
         return residentList;
     }
 
+    public void setResidentList(List<Person> residentList) {
+        this.residentList = residentList;
+    }
+
+    public List<Person> getMainResidentList() {
+        return mainResidentList;
+    }
+
+    public void setMainResidentList(List<Person> mainResidentList) {
+        this.mainResidentList = mainResidentList;
+    }
+
     public void addResident(Person person) {
         if(person.getMainAddress() == null){
             mainResidentList.add(person);
@@ -98,5 +111,19 @@ public class Address implements Serializable {
         else{
             residentList.add(person);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return street.equals(address.street) && number.equals(address.number) &&
+                cep.equals(address.cep) && city.equals(address.city);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(street, number, cep, city);
     }
 }
