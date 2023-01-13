@@ -44,6 +44,15 @@ public class PersonService {
         existentAltertativeAddressCheck(existentAddressList, person);
     }
 
+    public void updateChecks(Person person, Address mainAddress, List<Address> alternativeAddressList){
+        List<Address> existentAddressList = addressService.getAll();
+        nullAttributesCheck(person);
+        if(existentAddressList.isEmpty()) return;
+        existentMainAddressCheck(existentAddressList, mainAddress, person);
+        existentAltertativeAddressCheck(existentAddressList, alternativeAddressList, person);
+    }
+
+
     public void nullAttributesCheck(Person dto){
         if(dto.getName() == null) {
             throw new IllegalArgumentException("Person name can't be null");
@@ -53,6 +62,7 @@ public class PersonService {
         }
     }
 
+    // Check if the main address of PERSON exist in database and link it to the person
     public void existentMainAddressCheck(List<Address> existentAddressList, Person person){
         Address mainAddress = addressService.getStoragedMainAddress(existentAddressList, person.getMainAddress());
         if(mainAddress != null){
@@ -60,12 +70,35 @@ public class PersonService {
         }
     }
 
+    // Check if a main address (without resident) exist in database and link it to the person
+    public void existentMainAddressCheck(List<Address> existentAddressList, Address mainAddress, Person person){
+        mainAddress = addressService.getStoragedMainAddress(existentAddressList, mainAddress);
+        if(mainAddress != null){
+            person.setMainAddress(mainAddress);
+        }
+    }
+
+    // Check if the alternative addresses of PERSON exist in database and link it to the person
     public void existentAltertativeAddressCheck(List<Address> existentAddressList, Person person){
         List<Address> storagedAlternativeAddressList = addressService.getStoragedAlternativeAddress(
                 existentAddressList, person.getAlternativeAddressList());
         for(Address personAlternativeAddress: person.getAlternativeAddressList()){
             if(!storagedAlternativeAddressList.contains(personAlternativeAddress)){
                 storagedAlternativeAddressList.add(personAlternativeAddress);
+            }
+        }
+        person.setAlternativeAddressList(storagedAlternativeAddressList);
+    }
+
+    // Check if the alternative addresses (without resident) exist in database and link it to the person
+    public void existentAltertativeAddressCheck(
+            List<Address> existentAddressList, List<Address> alternativeAddress, Person person
+    ){
+        List<Address> storagedAlternativeAddressList = addressService.getStoragedAlternativeAddress(
+                existentAddressList, alternativeAddress);
+        for(Address address: alternativeAddress){
+            if(!storagedAlternativeAddressList.contains(address)){
+                storagedAlternativeAddressList.add(address);
             }
         }
         person.setAlternativeAddressList(storagedAlternativeAddressList);
@@ -95,20 +128,17 @@ public class PersonService {
         if(dto == null){
             return HttpStatus.BAD_REQUEST;
         }
-
-        Person person = personRepository.findById(dto.getId())
+        Person savedPerson = personRepository.findById(dto.getId())
                 .orElseThrow(() -> new PersonNotFoundException("There isn't user saved with this ID"));
-
-        Address mainAddress = AddressMapper.fromDtoToAddress(dto.getMainAddress(), person);
-        List<Address> alternativeAddressList = AddressMapper.fromDtoListToAddressList(dto.getAlternativeAddressList(), person);
-
-        person.setName(dto.getName());
-        person.setBirthdate(dto.getBirthdate() != null ? LocalDate.parse(dto.getBirthdate()) : null);
-        person.setMainAddress(mainAddress);
-        person.setAlternativeAddressList(alternativeAddressList);
-        saveNewPersonAddresses(person.getMainAddress(), person.getAlternativeAddressList()); // Poderia verificar se já existem
-        nullAttributesCheck(person);
-        personRepository.save(person);
+        Address newMainAddress = AddressMapper.fromDtoToAddress(dto.getMainAddress(), savedPerson);
+        List<Address> newAlternativeAddressList = AddressMapper
+                .fromDtoListToAddressList(dto.getAlternativeAddressList(), savedPerson);
+        savedPerson.setName(dto.getName());
+        savedPerson.setBirthdate(dto.getBirthdate() != null ? LocalDate.parse(dto.getBirthdate()) : null);
+        updateChecks(savedPerson, newMainAddress, newAlternativeAddressList);
+        removeReceivedAddressDuplicate(savedPerson);
+        saveNewPersonAddresses(savedPerson.getMainAddress(), savedPerson.getAlternativeAddressList());
+        personRepository.save(savedPerson);
         return HttpStatus.OK;
     }
 
