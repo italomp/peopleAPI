@@ -1,5 +1,6 @@
 package com.api.peopleAPI.controllers;
 
+import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
 import com.api.peopleAPI.services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,13 @@ public class PersonController {
     @PostMapping
     public ResponseEntity<HttpStatus> save(@RequestBody PersonDto dto){
         return new ResponseEntity<>(personService.savePerson(dto));
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<HttpStatus> savePersonAddress(
+            @PathVariable("id") long personId, @RequestBody AddressDto addressDto
+    ){
+        return new ResponseEntity<>(personService.savePersonAddress(personId, addressDto));
     }
 
     @PutMapping

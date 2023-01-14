@@ -27,6 +27,11 @@ public class AddressService {
     public List<Address> getNonDuplicateAlternativeAddressList(
             Address mainAddress, List<Address> alternativeAddressList
     ){
+        if(alternativeAddressList == null){
+            List<Address> resultList = mainAddress == null ? new ArrayList<>() : new ArrayList<>(List.of(mainAddress));
+            return resultList;
+        }
+
         List<Address> copyOfAlternativeAddressList = new ArrayList<>();
         copyOfAlternativeAddressList.addAll(alternativeAddressList);
         List<Integer> duplicateAddressIndexes = new ArrayList<>();
@@ -51,7 +56,7 @@ public class AddressService {
         return new ArrayList<>(alternativeAddressSet);
     }
 
-    public Address getStoragedMainAddress(List<Address> existentAddressList, Address mainAddress){
+    public Address getAnEqualsSavedAddress(List<Address> existentAddressList, Address mainAddress){
         for(Address address: existentAddressList){
             if(address.equals(mainAddress)){
                 return address;
@@ -60,7 +65,7 @@ public class AddressService {
         return null;
     }
 
-    public List<Address> getStoragedAlternativeAddress(
+    public List<Address> getSavedAlternativeAddressList(
             List<Address> existentAddressList, List<Address> alternativeAddressList
     ){
         List<Address> result = new ArrayList<>();

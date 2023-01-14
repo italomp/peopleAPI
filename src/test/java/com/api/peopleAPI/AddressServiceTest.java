@@ -32,25 +32,25 @@ public class AddressServiceTest extends PeopleApiApplicationTests{
 
         assertEquals(
                 existentAddressList,
-                addressService.getStoragedAlternativeAddress(existentAddressList, alternativeAddressList),
+                addressService.getSavedAlternativeAddressList(existentAddressList, alternativeAddressList),
                 "The returned list is different from alternativeAddresList");
         alternativeAddressList.add(new Address(street, number + 4, cep, city, person));
         alternativeAddressList.add(new Address(street, number + 5, cep, city, person));
         assertEquals(
                 existentAddressList,
-                addressService.getStoragedAlternativeAddress(existentAddressList, alternativeAddressList),
+                addressService.getSavedAlternativeAddressList(existentAddressList, alternativeAddressList),
                 "The returned list is different from alternativeAddresList");
         alternativeAddressList.remove(4);
         alternativeAddressList.remove(3);
         alternativeAddressList.remove(2);
         assertEquals(
                 alternativeAddressList,
-                addressService.getStoragedAlternativeAddress(existentAddressList, alternativeAddressList),
+                addressService.getSavedAlternativeAddressList(existentAddressList, alternativeAddressList),
                 "The returned list is different from alternativeAddresList");
     }
 
     @Test
-    public void getStoragedMainAddressTest(){
+    public void getAnEqualsSavedAddressTest(){
         String street = "Rua da paz";
         Integer number = 10;
         Integer cep = 58429120;
@@ -63,15 +63,15 @@ public class AddressServiceTest extends PeopleApiApplicationTests{
             existentAddressList.add(new Address(street, number + i, cep, city, person));
         }
 
-        assertNull(addressService.getStoragedMainAddress(existentAddressList, mainAddress),
+        assertNull(addressService.getAnEqualsSavedAddress(existentAddressList, mainAddress),
                 "Null value wasn't returned");
         existentAddressList.add(mainAddress);
-        assertEquals(mainAddress, addressService.getStoragedMainAddress(existentAddressList, mainAddress),
+        assertEquals(mainAddress, addressService.getAnEqualsSavedAddress(existentAddressList, mainAddress),
                 "Main address wasn't returned");
     }
 
     @Test
-    public void getStoragedAlternativeAddressTest(){
+    public void getSavedAlternativeAddressListTest(){
         String street = "Rua da paz";
         Integer number = 10;
         Integer cep = 58429120;
@@ -88,21 +88,21 @@ public class AddressServiceTest extends PeopleApiApplicationTests{
 
         assertEquals(
                 listSizeExpect,
-                addressService.getStoragedAlternativeAddress(existentAddressList, null).size(),
+                addressService.getSavedAlternativeAddressList(existentAddressList, null).size(),
                 "Empty list wasn't returned");
         assertEquals(
                 listSizeExpect,
-                addressService.getStoragedAlternativeAddress(existentAddressList, alternativeAddressList).size(),
+                addressService.getSavedAlternativeAddressList(existentAddressList, alternativeAddressList).size(),
                 "Empty list wasn't returned");
         alternativeAddressList.add(existentAddressList.get(0));
         assertEquals(
                 ++listSizeExpect,
-                addressService.getStoragedAlternativeAddress(existentAddressList, alternativeAddressList).size(),
+                addressService.getSavedAlternativeAddressList(existentAddressList, alternativeAddressList).size(),
                 "Empty list wasn't returned");
         alternativeAddressList.add(existentAddressList.get(1));
         assertEquals(
                 ++listSizeExpect,
-                addressService.getStoragedAlternativeAddress(existentAddressList, alternativeAddressList).size(),
+                addressService.getSavedAlternativeAddressList(existentAddressList, alternativeAddressList).size(),
                 "Empty list wasn't returned");
     }
 }

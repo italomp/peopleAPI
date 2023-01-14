@@ -1,5 +1,6 @@
 package com.api.peopleAPI.services;
 
+import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
 import com.api.peopleAPI.exceptions.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
@@ -64,7 +65,7 @@ public class PersonService {
 
     // Check if the main address of PERSON exist in database and link it to the person
     public void setMainAddressOfPerson(List<Address> existentAddressList, Person person){
-        Address mainAddress = addressService.getStoragedMainAddress(existentAddressList, person.getMainAddress());
+        Address mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, person.getMainAddress());
         if(mainAddress != null){
             person.setMainAddress(mainAddress);
         }
@@ -72,7 +73,7 @@ public class PersonService {
 
     // Check if a main address (without resident) exist in database and link it to the person
     public void setMainAddressOfPerson(List<Address> existentAddressList, Address mainAddress, Person person){
-        mainAddress = addressService.getStoragedMainAddress(existentAddressList, mainAddress);
+        mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, mainAddress);
         if(mainAddress != null){
             person.setMainAddress(mainAddress);
         }
@@ -80,7 +81,7 @@ public class PersonService {
 
     // Check if the alternative addresses of PERSON exist in database and link it to the person
     public void setAlternativeAddressOfPerson(List<Address> existentAddressList, Person person){
-        List<Address> storagedAlternativeAddressList = addressService.getStoragedAlternativeAddress(
+        List<Address> storagedAlternativeAddressList = addressService.getSavedAlternativeAddressList(
                 existentAddressList, person.getAlternativeAddressList());
         for(Address personAlternativeAddress: person.getAlternativeAddressList()){
             if(!storagedAlternativeAddressList.contains(personAlternativeAddress)){
@@ -94,7 +95,7 @@ public class PersonService {
     public void setAlternativeAddressOfPerson(
             List<Address> existentAddressList, List<Address> alternativeAddress, Person person
     ){
-        List<Address> storagedAlternativeAddressList = addressService.getStoragedAlternativeAddress(
+        List<Address> storagedAlternativeAddressList = addressService.getSavedAlternativeAddressList(
                 existentAddressList, alternativeAddress);
         for(Address address: alternativeAddress){
             if(!storagedAlternativeAddressList.contains(address)){
@@ -156,5 +157,22 @@ public class PersonService {
             personDtoList.add(personDto);
         });
         return personDtoList;
+    }
+
+    public HttpStatus savePersonAddress(long personId, AddressDto addressDto) {
+        if(addressDto == null){
+            throw new IllegalArgumentException("The address can't be null");
+        }
+        Person savedPerson = personRepository.findById(personId)
+                .orElseThrow(() -> new PersonNotFoundException("There isn't user saved with this ID"));
+        Address newAddress = AddressMapper.fromDtoToAddress(addressDto, savedPerson);
+        List<Address> existentAddressList = addressService.getAll();
+        Address savedAddress = addressService.getAnEqualsSavedAddress(existentAddressList, newAddress);
+        if(savedAddress == null){
+            addressService.save(newAddress);
+        }
+        savedPerson.addAddress(savedAddress != null ? savedAddress : newAddress);
+        personRepository.save(savedPerson);
+        return HttpStatus.CREATED;
     }
 }

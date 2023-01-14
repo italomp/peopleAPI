@@ -79,7 +79,11 @@ public class Person implements Serializable {
         this.alternativeAddressList = alternativeAddressList;
     }
 
-    public void addNewAddress(Address newAddress){
+    public void addAddress(Address newAddress){
+        if(this.mainAddress == null){
+            this.mainAddress = newAddress;
+            return;
+        }
         this.alternativeAddressList.add(newAddress);
     }
 
