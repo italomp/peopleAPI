@@ -320,4 +320,34 @@ public class PersonServiceTest extends PeopleApiApplicationTests{
         verify(personRepository, times(1)).findById(validId);
         verify(personRepository, times(1)).findById(invalidId);
     }
+
+    @Test
+    @DisplayName("Should return all people saved as DTO")
+    public void getAllPersonDtoWhenTherIsSavedPersonInDatabaseTest(){
+        Person person1 = new Person(1, "Italo", LocalDate.now(), null, null);
+        Person person2 = new Person(2, "Thomas", LocalDate.now(), null, null);
+        Person person3 = new Person(3, "Fatima", LocalDate.now(), null, null);
+        PersonDto personDto1 = PersonMapper.fromPersonToDto(person1);
+        PersonDto personDto2 = PersonMapper.fromPersonToDto(person2);
+        PersonDto personDto3 = PersonMapper.fromPersonToDto(person3);
+        List<Person> savedPersonList = new ArrayList<>(List.of(person1, person2, person3));
+        List<PersonDto> savedPersonDtoList = new ArrayList<>(List.of(personDto1, personDto2, personDto3));
+
+        when(personRepository.findAll()).thenReturn(savedPersonList);
+
+        assertEquals(savedPersonDtoList, personService.getAll(), "A different list was returned");
+        verify(personRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("Should return an empty DTO list")
+    public void getAllPersonDtoWhenTherIsNotSavedPersonInDatabaseTest(){
+        List<Person> savedPersonList = new ArrayList<>();
+        List<PersonDto> savedPersonDtoList = new ArrayList<>();
+
+        when(personRepository.findAll()).thenReturn(savedPersonList);
+
+        assertEquals(savedPersonDtoList, personService.getAll(), "A different list was returned");
+        verify(personRepository, times(1)).findAll();
+    }
 }
