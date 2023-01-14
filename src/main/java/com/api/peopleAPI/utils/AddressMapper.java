@@ -25,6 +25,7 @@ public class AddressMapper {
             return null;
         }
         return new AddressDto(
+                address.getId(),
                 address.getStreet(),
                 address.getNumber(),
                 address.getCep(),
@@ -55,6 +56,7 @@ public class AddressMapper {
         List<AddressDto> addressDtoList = new ArrayList<>();
         addressList.forEach(address -> {
             AddressDto dto = new AddressDto(
+                    address.getId(),
                     address.getStreet(),
                     address.getNumber(),
                     address.getCep(),

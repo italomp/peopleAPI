@@ -18,6 +18,14 @@ public class AddressDto implements Serializable {
         this.city = city;
     }
 
+    public AddressDto(long id, String street, Integer number, Integer cep, String city) {
+        this.id = id;
+        this.street = street;
+        this.number = number;
+        this.cep = cep;
+        this.city = city;
+    }
+
     public long getId() {
         return id;
     }
