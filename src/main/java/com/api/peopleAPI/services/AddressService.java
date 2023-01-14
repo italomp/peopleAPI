@@ -17,13 +17,7 @@ public class AddressService {
     public AddressService(){}
 
     public Address save(Address address){
-        try{
-            return addressRepository.save(address);
-        }catch(Exception e){
-            e.printStackTrace();
-            e.getCause().printStackTrace();
-        }
-        return null;
+        return addressRepository.save(address);
     }
 
     public List<Address> getAll(){

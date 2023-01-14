@@ -105,6 +105,7 @@ public class Address implements Serializable {
     }
 
     public void addResident(Person person) {
+        if(person == null) return;
         if(person.getMainAddress() == null){
             mainResidentList.add(person);
         }

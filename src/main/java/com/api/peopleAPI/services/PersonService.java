@@ -40,16 +40,16 @@ public class PersonService {
         List<Address> existentAddressList = addressService.getAll();
         nullAttributesCheck(person);
         if(existentAddressList.isEmpty()) return;
-        existentMainAddressCheck(existentAddressList, person);
-        existentAltertativeAddressCheck(existentAddressList, person);
+        setMainAddressOfPerson(existentAddressList, person);
+        setAlternativeAddressOfPerson(existentAddressList, person);
     }
 
     public void updateChecks(Person person, Address mainAddress, List<Address> alternativeAddressList){
         List<Address> existentAddressList = addressService.getAll();
         nullAttributesCheck(person);
         if(existentAddressList.isEmpty()) return;
-        existentMainAddressCheck(existentAddressList, mainAddress, person);
-        existentAltertativeAddressCheck(existentAddressList, alternativeAddressList, person);
+        setMainAddressOfPerson(existentAddressList, mainAddress, person);
+        setAlternativeAddressOfPerson(existentAddressList, alternativeAddressList, person);
     }
 
 
@@ -63,7 +63,7 @@ public class PersonService {
     }
 
     // Check if the main address of PERSON exist in database and link it to the person
-    public void existentMainAddressCheck(List<Address> existentAddressList, Person person){
+    public void setMainAddressOfPerson(List<Address> existentAddressList, Person person){
         Address mainAddress = addressService.getStoragedMainAddress(existentAddressList, person.getMainAddress());
         if(mainAddress != null){
             person.setMainAddress(mainAddress);
@@ -71,7 +71,7 @@ public class PersonService {
     }
 
     // Check if a main address (without resident) exist in database and link it to the person
-    public void existentMainAddressCheck(List<Address> existentAddressList, Address mainAddress, Person person){
+    public void setMainAddressOfPerson(List<Address> existentAddressList, Address mainAddress, Person person){
         mainAddress = addressService.getStoragedMainAddress(existentAddressList, mainAddress);
         if(mainAddress != null){
             person.setMainAddress(mainAddress);
@@ -79,7 +79,7 @@ public class PersonService {
     }
 
     // Check if the alternative addresses of PERSON exist in database and link it to the person
-    public void existentAltertativeAddressCheck(List<Address> existentAddressList, Person person){
+    public void setAlternativeAddressOfPerson(List<Address> existentAddressList, Person person){
         List<Address> storagedAlternativeAddressList = addressService.getStoragedAlternativeAddress(
                 existentAddressList, person.getAlternativeAddressList());
         for(Address personAlternativeAddress: person.getAlternativeAddressList()){
@@ -91,7 +91,7 @@ public class PersonService {
     }
 
     // Check if the alternative addresses (without resident) exist in database and link it to the person
-    public void existentAltertativeAddressCheck(
+    public void setAlternativeAddressOfPerson(
             List<Address> existentAddressList, List<Address> alternativeAddress, Person person
     ){
         List<Address> storagedAlternativeAddressList = addressService.getStoragedAlternativeAddress(
