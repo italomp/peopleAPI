@@ -1,7 +1,9 @@
 package com.api.peopleAPI.services;
 
+import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.repositories.AddressRepository;
+import com.api.peopleAPI.utils.AddressMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -80,5 +82,10 @@ public class AddressService {
             }
         }
         return result;
+    }
+
+    public List<AddressDto> getAllAddressOfPerson(long personId) {
+        List<Address> addresOfPerson = addressRepository.findAllAddressOfPerson(personId);
+        return AddressMapper.fromAddressListToDtoList(addresOfPerson);
     }
 }

@@ -2,6 +2,7 @@ package com.api.peopleAPI.controllers;
 
 import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
+import com.api.peopleAPI.services.AddressService;
 import com.api.peopleAPI.services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,8 @@ import java.util.List;
 public class PersonController {
     @Autowired
     private PersonService personService;
+    @Autowired
+    private AddressService addressService;
 
     public PersonController(){}
 
@@ -38,6 +41,11 @@ public class PersonController {
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> getById(@PathVariable("id") long id){
         return new ResponseEntity<>(personService.getById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/address")
+    public ResponseEntity<List<AddressDto>> getAllAddressOfPerson(@PathVariable("id") long personId){
+        return new ResponseEntity<>(addressService.getAllAddressOfPerson(personId), HttpStatus.OK);
     }
 
     @GetMapping
