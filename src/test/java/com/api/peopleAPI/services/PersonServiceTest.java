@@ -365,13 +365,17 @@ public class PersonServiceTest{
     @Test
     @DisplayName("All cases of setMainAddressOfPerson method")
     public void setMainAddressOfPersonTest(){
+        // Invalid IDs
         long personInvalidId = 2L;
+        long addressInvalidId = Long.MAX_VALUE;
+
+        // Set person
         long personId = 1L;
         String name = "Italo Modesto Pereira";
         LocalDate birthdate = LocalDate.parse("1992-12-30");
         Person person = new Person(name, birthdate, null, null);
 
-        long addressInvalidId = Long.MAX_VALUE;
+        // Set main, alternative and non-linked with porson adderesses
         long addresId = 1L;
         String street = "Rua 1";
         Integer number = 10;
@@ -380,21 +384,22 @@ public class PersonServiceTest{
         Address mainAddress = new Address(addresId, street, number, cep, city, person);
         Address addressNonLinkedWithPerson = new Address(addresId + 100L, street, number + 100, cep, city, null);
         List<Address> alternativeAddressList = new ArrayList<>();
-
         Address alternativeAddress1 = new Address(addresId + 1, street, number + 1, cep, city, person);
         Address alternativeAddress2 = new Address(addresId + 1, street, number + 1, cep, city, person);
         Address alternativeAddress3 = new Address(addresId + 1, street, number + 1, cep, city, person);
-
         alternativeAddressList.add(alternativeAddress1);
         alternativeAddressList.add(alternativeAddress2);
         alternativeAddressList.add(alternativeAddress3);
 
+        // Set main and alternative adderesses of person
         person.setMainAddress(mainAddress);
         person.setAlternativeAddressList(alternativeAddressList);
 
+        // Set personRepository behaviors
         when(personRepository.findById(ArgumentMatchers.eq(personId))).thenReturn(Optional.of(person));
         when(personRepository.findById(ArgumentMatchers.eq(personInvalidId))).thenThrow(new PersonNotFoundException(""));
 
+        // Set addressRepository behaviors
         when(addressRepository.findById(ArgumentMatchers.eq(addresId))).thenReturn(Optional.of(mainAddress));
         when(addressRepository.findById(ArgumentMatchers.eq(alternativeAddress1.getId()))).thenReturn(Optional.of(alternativeAddress1));
         when(addressRepository.findById(ArgumentMatchers.eq(alternativeAddress2.getId()))).thenReturn(Optional.of(alternativeAddress2));
