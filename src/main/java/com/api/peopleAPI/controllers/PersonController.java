@@ -38,6 +38,13 @@ public class PersonController {
         return new ResponseEntity<>(personService.update(dto));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<HttpStatus> setMainAddressOfPerson(
+            @PathVariable("id") long personId, @RequestParam("address_id") long addressId
+    ){
+        return new ResponseEntity<>(personService.setMainAddressOfPerson(personId, addressId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> getById(@PathVariable("id") long id){
         return new ResponseEntity<>(personService.getById(id), HttpStatus.OK);

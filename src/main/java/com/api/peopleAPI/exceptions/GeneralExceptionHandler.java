@@ -12,7 +12,31 @@ import java.util.Date;
 public class GeneralExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<CustomError> transactionSystemExceptionHandler(Exception ex, WebRequest request){
+    public ResponseEntity<CustomError> illegalArgumentExceptionHandler(Exception ex, WebRequest request){
+        CustomError msgError = new CustomError(new Date(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(msgError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PersonNotFoundException.class)
+    public ResponseEntity<CustomError> personNotFoundExceptionHandler(Exception ex, WebRequest request){
+        CustomError msgError = new CustomError(new Date(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(msgError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<CustomError> addressNotFoundExceptionHandler(Exception ex, WebRequest request){
+        CustomError msgError = new CustomError(new Date(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(msgError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AddressNotBelongingToThePersonException.class)
+    public ResponseEntity<CustomError> addressNotBelongingToThePersonExceptionHandler(Exception ex, WebRequest request){
+        CustomError msgError = new CustomError(new Date(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(msgError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<CustomError> exceptionHandler(Exception ex, WebRequest request){
         CustomError msgError = new CustomError(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(msgError, HttpStatus.BAD_REQUEST);
     }

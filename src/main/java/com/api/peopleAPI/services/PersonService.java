@@ -2,6 +2,7 @@ package com.api.peopleAPI.services;
 
 import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
+import com.api.peopleAPI.exceptions.AddressNotBelongingToThePersonException;
 import com.api.peopleAPI.exceptions.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PersonService {
@@ -63,7 +66,31 @@ public class PersonService {
         }
     }
 
-    // Check if the main address of PERSON exist in database and link it to the person
+    // Check if the address belongs to the person and if so, make it the main address of the person
+    public HttpStatus setMainAddressOfPerson(long personId, long addressId) {
+        Person person = personRepository.findById(personId).orElseThrow(
+                () -> new PersonNotFoundException("There isn't person saved with this ID"));
+        Address address = addressService.getById(addressId); // can throw AddressNotFoundException
+        if(address.getMainResidentList().contains(person)){
+            return HttpStatus.OK;
+        }
+        else if(address.getResidentList().contains(person)){
+            Address currMainAddress = person.getMainAddress();
+            List<Address> alternativeAddressList = person.getAlternativeAddressList();
+            alternativeAddressList.remove(address);
+            if(currMainAddress != null){
+                person.addAddress(currMainAddress); // Will be added as alternative address becouse the main address isn't null
+            }
+            person.setMainAddress(address);
+            personRepository.save(person);
+            return HttpStatus.OK;
+        }
+        else{
+            throw new AddressNotBelongingToThePersonException("This address not belonging to this person");
+        }
+    }
+
+    // Check if the main address of PERSON exist in existentAddressList and link it to the person
     public void setMainAddressOfPerson(List<Address> existentAddressList, Person person){
         Address mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, person.getMainAddress());
         if(mainAddress != null){
@@ -71,7 +98,7 @@ public class PersonService {
         }
     }
 
-    // Check if a main address (without resident) exist in database and link it to the person
+    // Check if a main address (without resident) exist in existentAddressList and link it to the person
     public void setMainAddressOfPerson(List<Address> existentAddressList, Address mainAddress, Person person){
         mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, mainAddress);
         if(mainAddress != null){
@@ -130,7 +157,7 @@ public class PersonService {
             return HttpStatus.BAD_REQUEST;
         }
         Person savedPerson = personRepository.findById(dto.getId())
-                .orElseThrow(() -> new PersonNotFoundException("There isn't user saved with this ID"));
+                .orElseThrow(() -> new PersonNotFoundException("There isn't person saved with this ID"));
         Address newMainAddress = AddressMapper.fromDtoToAddress(dto.getMainAddress(), savedPerson);
         List<Address> newAlternativeAddressList = AddressMapper
                 .fromDtoListToAddressList(dto.getAlternativeAddressList(), savedPerson);
@@ -145,7 +172,7 @@ public class PersonService {
 
     public PersonDto getById(long id) {
         Person person = personRepository.findById(id).orElseThrow(
-                () ->new PersonNotFoundException("There isn't user saved with entered ID"));
+                () ->new PersonNotFoundException("There isn't person saved with entered ID"));
         return PersonMapper.fromPersonToDto(person);
     }
 
@@ -164,7 +191,7 @@ public class PersonService {
             throw new IllegalArgumentException("The address can't be null");
         }
         Person savedPerson = personRepository.findById(personId)
-                .orElseThrow(() -> new PersonNotFoundException("There isn't user saved with this ID"));
+                .orElseThrow(() -> new PersonNotFoundException("There isn't person saved with this ID"));
         Address newAddress = AddressMapper.fromDtoToAddress(addressDto, savedPerson);
         List<Address> existentAddressList = addressService.getAll();
         Address savedAddress = addressService.getAnEqualsSavedAddress(existentAddressList, newAddress);
@@ -175,4 +202,6 @@ public class PersonService {
         personRepository.save(savedPerson);
         return HttpStatus.CREATED;
     }
+
+
 }
