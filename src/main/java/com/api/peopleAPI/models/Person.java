@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +31,7 @@ public class Person implements Serializable {
     private Address mainAddress;
 
     public Person() {
+        this.alternativeAddressList = new ArrayList<>();
     }
 
     public Person(String name, LocalDate birthdate, Address mainAddress, List<Address> alternativeAddressList) {
