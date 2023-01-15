@@ -1,6 +1,7 @@
 package com.api.peopleAPI.dtos;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class AddressDto implements Serializable {
     private long id;
@@ -66,4 +67,16 @@ public class AddressDto implements Serializable {
         this.city = city;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AddressDto that = (AddressDto) o;
+        return street.equals(that.street) && number.equals(that.number) && cep.equals(that.cep) && city.equals(that.city);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(street, number, cep, city);
+    }
 }

@@ -1,21 +1,31 @@
 package com.api.peopleAPI;
 
+import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
+import com.api.peopleAPI.repositories.AddressRepository;
 import com.api.peopleAPI.services.AddressService;
+import com.api.peopleAPI.utils.AddressMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 
 public class AddressServiceTest extends PeopleApiApplicationTests{
+    @MockBean
+    private AddressRepository addressRepository;
     @Autowired
+    @InjectMocks
     private AddressService addressService;
     private Address mainAddress;
     private List<Address> alternativeAddressList;
@@ -120,7 +130,7 @@ public class AddressServiceTest extends PeopleApiApplicationTests{
     }
 
     @Test
-    @DisplayName("All cases of getSavedAlternativeAddressList")
+    @DisplayName("All cases of getSavedAlternativeAddressList method")
     public void getSavedAlternativeAddressListTest(){
         for(int i = 1; i < 4; i++){
             alternativeAddressList.add(new Address(street, number + i, cep, city, person));
@@ -147,5 +157,35 @@ public class AddressServiceTest extends PeopleApiApplicationTests{
                 alternativeAddressList,
                 addressService.getSavedAlternativeAddressList(existentAddressList, alternativeAddressList),
                 "The returned list is different from alternativeAddresList");
+    }
+
+    @Test
+    @DisplayName("All cases of getAllAddressOfPerson method")
+    public void getAllAddressOfPersonTest(){
+        long existentPersonId = 1L;
+        long nonexistentPersonId = 2L;
+        List<Address> addressList = new ArrayList<>();
+        List<AddressDto> addressDtoList;
+
+        for(int i = 0; i < 3; i++){
+            int currAddressNumber = mainAddress.getNumber();
+            mainAddress.setNumber(++currAddressNumber);
+            addressList.add(mainAddress);
+        }
+        addressDtoList = AddressMapper.fromAddressListToDtoList(addressList);
+
+        when(addressRepository.findAllAddressOfPerson(ArgumentMatchers.eq(existentPersonId)))
+                .thenReturn(addressList);
+        when(addressRepository.findAllAddressOfPerson(ArgumentMatchers.eq(nonexistentPersonId)))
+                .thenReturn(new ArrayList<>());
+
+        assertEquals(
+                new ArrayList<AddressDto>(),
+                addressService.getAllAddressOfPerson(nonexistentPersonId),
+                "An empty list wasn't returned");
+        assertEquals(
+                addressDtoList,
+                addressService.getAllAddressOfPerson(existentPersonId),
+                "A different list was returned");
     }
 }
