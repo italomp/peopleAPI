@@ -2,17 +2,21 @@ package com.api.peopleAPI.services;
 
 import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
+import com.api.peopleAPI.exceptions.address.AddressNotBelongingToThePersonException;
+import com.api.peopleAPI.exceptions.address.AddressNotFoundException;
 import com.api.peopleAPI.exceptions.person.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
+import com.api.peopleAPI.repositories.AddressRepository;
 import com.api.peopleAPI.repositories.PersonRepository;
 import com.api.peopleAPI.utils.AddressMapper;
 import com.api.peopleAPI.utils.PersonMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -30,11 +34,18 @@ import static org.mockito.Mockito.*;
 public class PersonServiceTest{
     @MockBean
     private PersonRepository personRepository;
-    @MockBean
+    @Spy
+    private AddressRepository addressRepository;
+    @Spy
+    @InjectMocks
     private AddressService addressService;
-    @Autowired
     @InjectMocks
     private PersonService personService;
+
+    @BeforeEach
+    public void setPersonService(){
+        personService = new PersonService(personRepository, addressService);
+    }
 
     @Test
     @DisplayName("Should save the person")
@@ -157,7 +168,7 @@ public class PersonServiceTest{
 
         PersonDto updatedPersonDto = PersonMapper.fromPersonToDto(updatedPerson);
 
-        when(personRepository.findById(personId)).thenReturn(Optional.of(savedPerson));
+        when(personRepository.findById(ArgumentMatchers.eq(personId))).thenReturn(Optional.of(savedPerson));
         when(personRepository.save(ArgumentMatchers.eq(updatedPerson))).thenReturn(updatedPerson);
 
         assertEquals(HttpStatus.OK, personService.update(updatedPersonDto), "Person was not updated");
@@ -349,5 +360,77 @@ public class PersonServiceTest{
 
         assertEquals(savedPersonDtoList, personService.getAll(), "A different list was returned");
         verify(personRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("All cases of setMainAddressOfPerson method")
+    public void setMainAddressOfPersonTest(){
+        long personInvalidId = 2L;
+        long personId = 1L;
+        String name = "Italo Modesto Pereira";
+        LocalDate birthdate = LocalDate.parse("1992-12-30");
+        Person person = new Person(name, birthdate, null, null);
+
+        long addressInvalidId = Long.MAX_VALUE;
+        long addresId = 1L;
+        String street = "Rua 1";
+        Integer number = 10;
+        Integer cep = 58429120;
+        String city = "Campina Grande";
+        Address mainAddress = new Address(addresId, street, number, cep, city, person);
+        Address addressNonLinkedWithPerson = new Address(addresId + 100L, street, number + 100, cep, city, null);
+        List<Address> alternativeAddressList = new ArrayList<>();
+
+        Address alternativeAddress1 = new Address(addresId + 1, street, number + 1, cep, city, person);
+        Address alternativeAddress2 = new Address(addresId + 1, street, number + 1, cep, city, person);
+        Address alternativeAddress3 = new Address(addresId + 1, street, number + 1, cep, city, person);
+
+        alternativeAddressList.add(alternativeAddress1);
+        alternativeAddressList.add(alternativeAddress2);
+        alternativeAddressList.add(alternativeAddress3);
+
+        person.setMainAddress(mainAddress);
+        person.setAlternativeAddressList(alternativeAddressList);
+
+        when(personRepository.findById(ArgumentMatchers.eq(personId))).thenReturn(Optional.of(person));
+        when(personRepository.findById(ArgumentMatchers.eq(personInvalidId))).thenThrow(new PersonNotFoundException(""));
+
+        when(addressRepository.findById(ArgumentMatchers.eq(addresId))).thenReturn(Optional.of(mainAddress));
+        when(addressRepository.findById(ArgumentMatchers.eq(alternativeAddress1.getId()))).thenReturn(Optional.of(alternativeAddress1));
+        when(addressRepository.findById(ArgumentMatchers.eq(alternativeAddress2.getId()))).thenReturn(Optional.of(alternativeAddress2));
+        when(addressRepository.findById(ArgumentMatchers.eq(alternativeAddress3.getId()))).thenReturn(Optional.of(alternativeAddress3));
+        when(addressRepository.findById(ArgumentMatchers.eq(addressNonLinkedWithPerson.getId()))).thenReturn(Optional.of(addressNonLinkedWithPerson));
+        when(addressRepository.findById(ArgumentMatchers.eq(addressInvalidId))).thenThrow(new AddressNotFoundException(""));
+
+        // Giving Invalid personId
+        assertThrows(
+                PersonNotFoundException.class,
+                () -> personService.setMainAddressOfPerson(personInvalidId, alternativeAddress1.getId()),
+                "Exception wasn't thrown");
+
+        // Giving Invalid addressId
+        assertThrows(
+                AddressNotFoundException.class,
+                () -> personService.setMainAddressOfPerson(personId, addressInvalidId),
+                "Exception wasn't thrown");
+
+        // Giving mainAddress who already is the mainAddress of person
+        assertEquals(person.getMainAddress(), mainAddress, "Main addresses are different");
+        assertEquals(HttpStatus.OK, personService.setMainAddressOfPerson(personId, mainAddress.getId()));
+        assertEquals(mainAddress, person.getMainAddress(), "Main addresses are different");
+
+        // Giving mainAddress who already isn't the mainAddress of person, but is alternative.
+        person.getAlternativeAddressList().add(person.getMainAddress());
+        person.setMainAddress(alternativeAddress1);
+        when(personRepository.save(ArgumentMatchers.eq(person))).thenReturn(person);
+
+        assertEquals(HttpStatus.OK, personService.setMainAddressOfPerson(personId, alternativeAddress1.getId()));
+        assertEquals(alternativeAddress1, person.getMainAddress(), "Main addresses are different");
+
+        // Giving mainAddress who already isn't the mainAddress or alternative of person
+        assertThrows(
+                AddressNotBelongingToThePersonException.class,
+                () -> personService.setMainAddressOfPerson(personId, addressNonLinkedWithPerson.getId()),
+                "Exception wasn't thrown");
     }
 }

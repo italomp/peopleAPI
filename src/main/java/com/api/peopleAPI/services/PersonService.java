@@ -19,12 +19,14 @@ import java.util.List;
 
 @Service
 public class PersonService {
-    @Autowired
     private PersonRepository personRepository;
-    @Autowired
     private AddressService addressService;
 
-    public PersonService(){}
+    @Autowired
+    public PersonService(PersonRepository personRepository, AddressService addressService){
+        this.personRepository = personRepository;
+        this.addressService = addressService;
+    }
 
     public HttpStatus savePerson(PersonDto dto){
         if(dto == null){
@@ -64,6 +66,22 @@ public class PersonService {
         }
     }
 
+    // Check if the main address of PERSON exist in existentAddressList and link it to the person
+    public void setMainAddressOfPerson(List<Address> existentAddressList, Person person){
+        Address mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, person.getMainAddress());
+        if(mainAddress != null){
+            person.setMainAddress(mainAddress);
+        }
+    }
+
+    // Check if a main address (without resident) exist in existentAddressList and link it to the person
+    public void setMainAddressOfPerson(List<Address> existentAddressList, Address mainAddress, Person person){
+        mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, mainAddress);
+        if(mainAddress != null){
+            person.setMainAddress(mainAddress);
+        }
+    }
+
     // Check if the address belongs to the person and if so, make it the main address of the person
     public HttpStatus setMainAddressOfPerson(long personId, long addressId) {
         Person person = personRepository.findById(personId).orElseThrow(
@@ -85,22 +103,6 @@ public class PersonService {
         }
         else{
             throw new AddressNotBelongingToThePersonException("This address not belonging to this person");
-        }
-    }
-
-    // Check if the main address of PERSON exist in existentAddressList and link it to the person
-    public void setMainAddressOfPerson(List<Address> existentAddressList, Person person){
-        Address mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, person.getMainAddress());
-        if(mainAddress != null){
-            person.setMainAddress(mainAddress);
-        }
-    }
-
-    // Check if a main address (without resident) exist in existentAddressList and link it to the person
-    public void setMainAddressOfPerson(List<Address> existentAddressList, Address mainAddress, Person person){
-        mainAddress = addressService.getAnEqualsSavedAddress(existentAddressList, mainAddress);
-        if(mainAddress != null){
-            person.setMainAddress(mainAddress);
         }
     }
 
@@ -200,6 +202,4 @@ public class PersonService {
         personRepository.save(savedPerson);
         return HttpStatus.CREATED;
     }
-
-
 }

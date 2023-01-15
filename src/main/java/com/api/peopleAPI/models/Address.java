@@ -48,6 +48,17 @@ public class Address implements Serializable {
         addResident(person);
     }
 
+    public Address(long id, String street, Integer number, Integer cep, String city, Person person) {
+        this.id = id;
+        this.street = street;
+        this.number = number;
+        this.cep = cep;
+        this.city = city;
+        residentList = new ArrayList<>();
+        mainResidentList = new ArrayList<>();
+        addResident(person);
+    }
+
     public long getId() {
         return id;
     }
