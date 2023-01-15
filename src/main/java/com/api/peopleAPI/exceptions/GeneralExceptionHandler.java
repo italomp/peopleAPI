@@ -1,5 +1,8 @@
 package com.api.peopleAPI.exceptions;
 
+import com.api.peopleAPI.exceptions.address.AddressNotBelongingToThePersonException;
+import com.api.peopleAPI.exceptions.address.AddressNotFoundException;
+import com.api.peopleAPI.exceptions.person.PersonNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

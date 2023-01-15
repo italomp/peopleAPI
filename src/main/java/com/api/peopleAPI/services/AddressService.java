@@ -1,7 +1,7 @@
 package com.api.peopleAPI.services;
 
 import com.api.peopleAPI.dtos.AddressDto;
-import com.api.peopleAPI.exceptions.AddressNotFoundException;
+import com.api.peopleAPI.exceptions.address.AddressNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.repositories.AddressRepository;
 import com.api.peopleAPI.utils.AddressMapper;

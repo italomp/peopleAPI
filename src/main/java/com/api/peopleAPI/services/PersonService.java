@@ -2,8 +2,8 @@ package com.api.peopleAPI.services;
 
 import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
-import com.api.peopleAPI.exceptions.AddressNotBelongingToThePersonException;
-import com.api.peopleAPI.exceptions.PersonNotFoundException;
+import com.api.peopleAPI.exceptions.address.AddressNotBelongingToThePersonException;
+import com.api.peopleAPI.exceptions.person.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
 import com.api.peopleAPI.repositories.PersonRepository;
@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class PersonService {

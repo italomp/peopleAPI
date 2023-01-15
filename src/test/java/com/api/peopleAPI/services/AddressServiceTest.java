@@ -1,10 +1,9 @@
-package com.api.peopleAPI;
+package com.api.peopleAPI.services;
 
 import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
 import com.api.peopleAPI.repositories.AddressRepository;
-import com.api.peopleAPI.services.AddressService;
 import com.api.peopleAPI.utils.AddressMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
@@ -21,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
-public class AddressServiceTest extends PeopleApiApplicationTests{
+@SpringBootTest
+public class AddressServiceTest{
     @MockBean
     private AddressRepository addressRepository;
     @Autowired

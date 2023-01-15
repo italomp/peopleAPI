@@ -1,13 +1,11 @@
-package com.api.peopleAPI;
+package com.api.peopleAPI.services;
 
 import com.api.peopleAPI.dtos.AddressDto;
 import com.api.peopleAPI.dtos.PersonDto;
-import com.api.peopleAPI.exceptions.PersonNotFoundException;
+import com.api.peopleAPI.exceptions.person.PersonNotFoundException;
 import com.api.peopleAPI.models.Address;
 import com.api.peopleAPI.models.Person;
 import com.api.peopleAPI.repositories.PersonRepository;
-import com.api.peopleAPI.services.AddressService;
-import com.api.peopleAPI.services.PersonService;
 import com.api.peopleAPI.utils.AddressMapper;
 import com.api.peopleAPI.utils.PersonMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
@@ -27,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-public class PersonServiceTest extends PeopleApiApplicationTests{
+@SpringBootTest
+public class PersonServiceTest{
     @MockBean
     private PersonRepository personRepository;
     @MockBean
