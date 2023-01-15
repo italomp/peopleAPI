@@ -36,6 +36,8 @@ public class Address implements Serializable {
     private List<Person> mainResidentList;
 
     public Address() {
+        residentList = new ArrayList<>();
+        mainResidentList = new ArrayList<>();
     }
 
     public Address(String street, Integer number, Integer cep, String city, Person person) {
