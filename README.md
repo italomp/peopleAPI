@@ -2,6 +2,9 @@
 ### Important: This API was developed in english, so your entities and entities attributes are in english.
 This API allows you to manage people and their addresses. <br>
 
+### Base URL:
+http://44.206.242.29:8080
+
 ## Features: <br>
 ### 1ª Create Person: <br>
 **Endpoint:** /api/v1/person<br>
